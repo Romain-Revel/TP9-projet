@@ -1,0 +1,58 @@
+---
+- name: "Installation de PHP et Apache"
+  hosts: all
+  become: yes
+
+  pre_tasks:
+    - name: "epel-release"
+      yum:
+        update_cache: yes
+
+  tasks:
+    - name: "Installation apache"
+      yum:
+        name: httpd 
+        state: latest
+
+    - name: "Permit traffic in default zone for https service"
+      firewalld:
+        service: http
+        permanent: yes
+        state: enabled
+
+    - name: "Start and enable the httpd daemon"
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: "Installation du repository PHP"
+      yum:
+        name: http://rpms.remirepo.net/enterprise/remi-release-7.rpm 
+        state: present
+
+    - name: "Update yum cache"
+      yum:
+        update_cache: yes
+
+    - name: "Installation PHP"
+      yum:
+        name: "{{ item }}"  
+        state: latest
+        enablerepo: remi-php74
+      loop:
+        - php
+        - php-bz2
+        - php-mysql
+        - php-curl
+        - php-gd
+        - php-intl
+        - php-common
+        - php-mbstring
+        - php-xml
+
+    - name: "Restart httpd daemon to enable PHP extensions"
+      service:
+        name: httpd
+        state: restarted
+        enabled: yes
