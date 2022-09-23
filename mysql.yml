@@ -1,0 +1,103 @@
+---
+- name: "Installation de MySQL"
+  hosts: all
+  gather_facts: yes
+  become: yes
+  vars:
+#    - ansible_python_interpreter: /usr/bin/python3
+    - mysql_root_login: 'root'
+    - mysql_root_password: 'Azerty123456'
+    - mysql_wordpress_login: 'wordpress'
+    - mysql_wordpress_password: 'wordpress'
+    - mysql_wordpress_database: 'wordpress'
+
+  pre_tasks:
+    - name: "Update Yum cache"
+      yum:
+        update_cache: yes
+
+  tasks:
+    - name: "Install mariadb-server"
+      yum:
+        name:
+          - mariadb-server
+          - python2-PyMySQL
+        state: latest
+
+    - name: "Start and enable the mariadb daemon"
+      service:
+        name: mariadb
+        state: started
+        enabled: yes
+
+    - name: "Check that the my.cnf file exists"
+      stat:
+        path: /root/.my.cnf
+      register: mycnf
+
+    - name: "Change MySQL root Password using SQL query"
+      community.mysql.mysql_query:
+        login_user: 'root'
+        login_password: ''
+        login_db: 'mysql'
+        query:
+          - SET PASSWORD FOR 'root'@'localhost' = PASSWORD('{{ mysql_root_password }}')
+          - SET PASSWORD FOR 'root'@'127.0.0.1' = PASSWORD('{{ mysql_root_password }}')
+          - SET PASSWORD FOR 'root'@'::1' = PASSWORD('{{ mysql_root_password }}')
+      when: not mycnf.stat.exists == true
+
+    - name: "Create /root/.my.cnf"
+      template:
+        src: my.cnf.j2
+        dest: /root/.my.cnf
+        mode: '0600'
+        owner: root
+        group: root
+      when: not mycnf.stat.exists == true
+
+    - name: "Reload privilege tables"
+      command: 'mysql -ne "{{ item }}"'
+      loop:
+        - FLUSH PRIVILEGES
+      changed_when: False
+
+    - name: "Remove anonymous users"
+      command: 'mysql -ne "{{ item }}"'
+      loop:
+        - DELETE FROM mysql.user WHERE User=''
+      changed_when: False
+
+    - name: "Disallow root login remotely"
+      command: 'mysql -ne "{{ item }}"'
+      loop:
+        - DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')
+      changed_when: False
+
+    - name: "Remove test database and access to it"
+      command: 'mysql -ne "{{ item }}"'
+      loop:
+        - DROP DATABASE IF EXISTS test
+        - DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%'
+      changed_when: False
+
+    - name: "Reload privilege tables"
+      command: 'mysql -ne "{{ item }}"'
+      loop:
+        - FLUSH PRIVILEGES
+      changed_when: False
+
+    - name: "Create new databases with names 'wordpress'"
+      mysql_db:
+        name:
+          - wordpress
+        state: present
+
+    - name: Create user with all permissions on database wordpress
+      no_log: yes
+      mysql_user:
+        login_user: '{{ mysql_root_login }}'
+        login_password: '{{ mysql_root_password }}'
+        name: '{{ mysql_wordpress_login }}'
+        password: '{{ mysql_wordpress_password }}'
+        state: present
+        priv: "{{ mysql_wordpress_database }}.*:ALL"

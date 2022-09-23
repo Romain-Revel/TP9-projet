@@ -1,0 +1,11 @@
+# {{ ansible_managed }}
+
+# This file is symlinked to /root/.my.cnf to use passwordless login for the root user
+
+[client]
+user     = {{ mysql_root_login }}
+password = {{ mysql_root_password }}
+
+[mysql_upgrade]
+user     = {{ mysql_root_login }}
+password = {{ mysql_root_password }}

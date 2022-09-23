@@ -1,0 +1,6 @@
+---
+- name: "Installation complète de Wordpress"
+  tasks:
+    - import_task: php.yml
+    - import_task: mysql.yml
+    - import_task: wordpress.yml
