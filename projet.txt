@@ -1,0 +1,42 @@
+PROJET D'ENTREPRISE
+####################
+
+
+vous êtes recruté dans au sein de d'une ESN en tant qu'ingénieur Devops .
+
+l'entreprise a un manuel d'installation produit par un ingénieur système qui permet de déployer
+
+wordpress en ligne de commande et vous devez apporter une solution afin  d'aider l'entreprise à 
+
+déployer Wordpress de façon automatique  et ceci grâce à Ansible .
+
+Votre manuel se trouve sur le lien : https://www.vultr.com/docs/how-to-install-wordpress-on-centos-7/
+
+
+Vous avez 2 tâches à accomplir :
+
+* vous devez écrire 4 playbooks :
+
+. Un playbook qui s'appellera php.yml qui préparera l'environnement en installant PHP, Apache et tout le nécessaire
+
+. Un playbook qui s'appellera wordpress.yml qui téléchargera Wordpress et mettra en place la configuration de wordpress
+
+. Un playbook qui s'appellera mysql.yml qui installera Mysql et va mettre en place la configuration necessaire pour la base de données
+
+. un playbook qui s'appellera master.yml qui déploiera Wordpress en appelant les autres playbooks
+
+
+NB : vous devez mettre en place les bonnes pratiques au sein de votre projet et le sécuriser également et ceci grâce à Vault
+
+
+* vous devez créer en suite 3 rôles pour les playbooks php.yml , wordpress.yml et mysql.yml ( noms des rôles : php , wordpress , mysql ) .
+
+Vous allez également créer un fichier deploy_roles.yml qui appellera les 3 rôles et qui déploiera Wordpress .
+
+NB: les rôles devront être variabilisés au maximum pour une adaptation optimale.
+
+Une fois, les 2 tâches terminées, vous enverrez votre travail sur un compte github et vous enverrez le lien de votre dépôt à l'adresse fallewi@gmail.com
+
+Durée: (5 heures)
+
+Travail en groupe autorisé : préciser les participants lors de l'envoi du mail
